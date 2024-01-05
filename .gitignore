@@ -1,0 +1,13 @@
+vendor
+.env
+docker/mysql/database
+docker/nginx/logger
+docker/redis
+docker/php-fpm/logger
+storage
+.idea
+.vscode
+storage
+vendor
+.idea
+.vscode
