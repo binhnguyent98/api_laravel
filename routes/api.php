@@ -20,16 +20,16 @@ use Illuminate\Support\Facades\Route;
 //});
 
 Route::group(['prefix' => '/posts', 'middleware' => 'auth:api'], function () {
-    Route::get('/{id}', [PostController::class, 'detail']);
-    Route::get('/', [PostController::class, 'fetch']);
+    Route::get('/detail', [PostController::class, 'detail']);
+    Route::get('/list', [PostController::class, 'fetch']);
     Route::post('/create', [PostController::class, 'create']);
-    Route::delete('/delete/{id}', [PostController::class, 'delete']);
+    Route::delete('/delete', [PostController::class, 'delete']);
 });
 
 Route::group(['prefix' => '/auth'], function () {
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/verify', [AuthController::class, 'verify']);
     Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/renewToken/{refreshToken}', [AuthController::class, 'renewToken']);
+    Route::post('/renewToken', [AuthController::class, 'renewToken']);
     Route::post('/test', [AuthController::class, 'test']);
 });

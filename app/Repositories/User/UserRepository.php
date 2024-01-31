@@ -2,6 +2,7 @@
 
 namespace App\Repositories\User;
 
+use App\Exceptions\BaseException;
 use App\Http\Entities\UserEntity;
 use App\Models\User;
 use App\Repositories\BaseRepository;
@@ -20,7 +21,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         $existedUser = $this->model->where('email', '=', $entity->getEmail())->first();
 
         if ($existedUser) {
-            throw new \Exception('Email is existed');
+            throw new BaseException('ád');
         }
 
         $data = [

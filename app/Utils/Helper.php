@@ -27,15 +27,27 @@ class Helper
 
     public static function buildResponse(bool $status, $data = null, $error = [])
     {
-        $result = [
-            'status' => $status,
-        ];
-
-        if ($data) $result['data'] = $data;
-        if (count($error) > 0) $result['error'] = $error;
-
-        $resource = new BaseResponseResource($result);
-
-        return $resource->resource;
+        $response = [];
     }
+
+    public static function buildSuccessResponse($data = null, string $message = ''): array
+    {
+        return [
+            'status' => true,
+            'message' => $message,
+            'data' => $data
+        ];
+    }
+
+    public static function buildFailResponse(string $errorKey, ?string $message = ''): array
+    {
+        return [
+            'status' => false,
+            'message' => $message,
+            'error' => [
+                'errorKey' => $errorKey
+            ]
+        ];
+    }
+
 }

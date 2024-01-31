@@ -30,9 +30,10 @@ class CustomAuthenticateMiddleware
 
             return $next($request);
         } catch (\Exception $exception) {
-            $response = Helper::buildResponse(false, null, ['key' => config('error.forbidden')]);
+            $response = Helper::buildFailResponse(config('error.token_invalid'), $exception->getMessage());
 
-            return response()->json($response, config('http_status_code.unauthorized'));
+            return response()->json([], 200);
+            //TODO
         }
     }
 }

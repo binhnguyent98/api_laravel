@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use App\Utils\Helper;
+use Faker\Provider\Base;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Validation\ValidationException as ValidationException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
@@ -48,36 +49,43 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->reportable(function (Throwable $e) {
-            //
+
         });
     }
 
     public function render($request, Throwable $e)
     {
-        if ($e instanceof  MethodNotAllowedHttpException) {
-            $failResource = Helper::buildResponse(false,  null, ['key' => config('error.method_not_allow')]);
+        dd($e);
+        $statusCode = config('http_status_code.internal_server_error');
+        $errorKey = config('error.internal_server_error');
+        $message = '';
 
-            return response()->json($failResource, config('http_status_code.method_not_allowed.method_not_allow'));
+        switch (true) {
+            case $e instanceof NotFoundHttpException:
+                $statusCode = config('http_status_code.not_found');
+                $errorKey = config('error.route_not_found');
+                break;
+
+            case $e instanceof MethodNotAllowedHttpException:
+                $statusCode = config('http_status_code.method_not_allowed');
+                $errorKey = config('error.method_not_allow');
+                break;
+
+            case $e instanceof ValidationException:
+                $statusCode = config('http_status_code.bad_request');
+                $errorKey = config('error.validator');
+                $message = $e->getMessage();
+                break;
+
+            case $e instanceof Base:
+                $statusCode = 1;
+            default:
+                break;
         }
 
-        if ($e instanceof ValidationException) {
-            $failResource = Helper::buildResponse(false, null, ['key' => config('error.validator')]);
-
-            return response()->json($failResource, config('http_status_code.bad_request'));
-        }
-
-        if ($e instanceof NotFoundHttpException) {
-            $failResource = Helper::buildResponse(false, null, ['key' => config('error.not_found')]);
-
-            return response()->json($failResource, config('http_status_code.not_found'));
-        }
-
-        if ($this->isHttpException($e) && $e->getStatusCode() == 500) {
-            $failResource = Helper::buildResponse(false, null, ['key' => config('error.internal_server_error')]);
-
-            return response()->json($failResource, config('http_status_code.internal_server_error'));
-        }
-
-        return parent::render($request, $e);
+        return response()->json(
+            Helper::buildFailResponse($errorKey, $message),
+            $statusCode
+        );
     }
 }

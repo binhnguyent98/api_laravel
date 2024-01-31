@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Events\BroadcastingNotificationEvent;
+use App\Exceptions\BaseException;
 use App\Http\Controllers\Controller;
 use App\Http\Entities\LoginEntity;
 use App\Http\Entities\UserEntity;
@@ -24,19 +25,15 @@ class AuthController extends Controller
 
     public function register(RegisterUserRequest $request)
     {
-        try {
-            $param = new UserEntity(
-                $request->name,
-                $request->email,
-                $request->password
-            );
+        $param = new UserEntity(
+            $request->name,
+            $request->email,
+            $request->password
+        );
 
-            $this->authService->register($param);
+        $this->authService->register($param);
 
-            return $this->buildSuccessResponse();
-        } catch (\Exception $exception) {
-            return $this->buildFailResponse(['message' => $exception->getMessage(), 'key' => config('error.register_fail')]);
-        }
+        return $this->buildSuccessResponse();
     }
 
     public function verify(VerifyUserRequest $request)

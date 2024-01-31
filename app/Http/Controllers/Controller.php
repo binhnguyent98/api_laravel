@@ -13,9 +13,9 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    public function buildSuccessResponse($data = null, $httpCode = 200)
+    public function buildSuccessResponse($data = null, ?int $httpCode = 200, ?string $message = '')
     {
-        $resource = Helper::buildResponse(true, $data);
+        $resource = Helper::buildSuccessResponse($data, $message);
 
         return response()->json($resource, $httpCode);
     }
@@ -26,13 +26,9 @@ class Controller extends BaseController
      * @param int|null $statusCode
      * @return JsonResponse
      */
-    public function buildFailResponse(array $error = [], int $statusCode = null)
+    public function buildFailResponse(string $errorKey, ?string $message = '', ?int $statusCode = 400)
     {
-        if (!$statusCode) {
-            $statusCode = config('http_status_code.bad_request');
-        }
-
-        $resource = Helper::buildResponse(false, null, $error);
+        $resource = Helper::buildFailResponse($errorKey,  $message);
 
         return response()->json($resource, $statusCode);
     }
