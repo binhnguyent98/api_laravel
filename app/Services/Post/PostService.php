@@ -3,6 +3,7 @@
 namespace App\Services\Post;
 
 use App\Events\NotificationUserEvent;
+use App\Exceptions\ApiErrorException;
 use App\Http\Entities\NotificationEntity;
 use App\Http\Entities\PostEntity;
 use App\Http\Entities\PostQueryEntity;
@@ -26,20 +27,16 @@ class PostService extends BaseService
 
     public function create(PostEntity $data)
     {
-        try {
-            $post = $this->postRepository->createPost($data);
-            $user = auth()->user();
-            $notification = new NotificationEntity(
-                'Create post successfully:',
-                'Create post'.$post->title,
-                config('notification.notification_type.create_post'),
-                $user->id
-            );
+        $post = $this->postRepository->createPost($data);
+        $user = auth()->user();
+        $notification = new NotificationEntity(
+            'Create post successfully:',
+            'Create post'.$post->title,
+            config('notification.notification_type.create_post'),
+            $user->id
+        );
 
-            event(new NotificationUserEvent($user, $notification));
-        } catch (\Exception $exception) {
-            throw new \Exception($exception->getMessage());
-        }
+        event(new NotificationUserEvent($user, $notification));
     }
 
     public function delete($id)
@@ -49,6 +46,12 @@ class PostService extends BaseService
 
     public function detail($id)
     {
-        return $this->postRepository->find($id);
+        $post = $this->postRepository->find($id);
+
+        if (!$post) {
+            throw new ApiErrorException(config('error.post_not_found'));
+        }
+
+        return $post;
     }
 }

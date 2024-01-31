@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers\Api\Post;
 
-use App\Events\NotificationUserEvent;
 use App\Http\Controllers\Controller;
-use App\Http\Entities\NotificationEntity;
 use App\Http\Entities\PostEntity;
 use App\Http\Entities\PostQueryEntity;
+use App\Http\Requests\IdRequest;
 use App\Http\Requests\PostRequest;
 use App\Http\Resources\PostResource;
-use App\Mail\RegisterSuccessUserMail;
 use App\Services\Post\PostService;
 use Illuminate\Http\Request;
 
@@ -37,39 +35,26 @@ class PostController extends Controller
 
     public function create(PostRequest $request)
     {
-        try {
-            $this->postService->create(new PostEntity(
-                $request->title,
-                $request->description,
-                $request->category_id
-            ));
+        $this->postService->create(new PostEntity(
+            $request->title,
+            $request->description,
+            $request->category_id
+        ));
 
-            return $this->buildSuccessResponse(null, config('http_status_code.created'));
-        } catch (\Exception $exception) {
-            return $this->buildFailResponse(['message' => $exception->getMessage(), 'key' => config('error.item_not_found')]);
-        }
+        return $this->buildSuccessResponse();
     }
 
-    public function delete($id)
+    public function delete(IdRequest $request)
     {
-        try {
-            $this->postService->delete((int)$id);
+        $this->postService->delete((int)$request->id);
 
-            return $this->buildSuccessResponse();
-        } catch (\Exception $exception) {
-            return $this->buildFailResponse(['message' => $exception->getMessage(), 'key' => config('error.item_not_found')]);
-
-        }
+        return $this->buildSuccessResponse();
     }
 
-    public function detail($id)
+    public function detail(IdRequest $request)
     {
-        try {
-            $post = $this->postService->detail((int)$id);
-            return $this->buildSuccessResponse($post);
-        } catch (\Exception $exception) {
-            return $this->buildFailResponse(['message' => $exception->getMessage(), 'key' => config('error.item_not_found')]);
+        $post = $this->postService->detail((int)$request->id);
 
-        }
+        return $this->buildSuccessResponse($post);
     }
 }

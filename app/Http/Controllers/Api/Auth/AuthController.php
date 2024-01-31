@@ -2,22 +2,18 @@
 
 namespace App\Http\Controllers\Api\Auth;
 
-use App\Events\BroadcastingNotificationEvent;
-use App\Exceptions\BaseException;
 use App\Http\Controllers\Controller;
 use App\Http\Entities\LoginEntity;
 use App\Http\Entities\UserEntity;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterUserRequest;
-use App\Http\Requests\VerifyUserRequest;
+use App\Http\Requests\TokenRequest;
 use App\Http\Resources\LoginResource;
-use App\Http\Resources\NotificationResource;
-use App\Models\User;
 use App\Services\Auth\AuthService;
 class AuthController extends Controller
 {
 
-    private $authService;
+    protected $authService;
     public function __construct(AuthService $authService)
     {
         $this->authService = $authService;
@@ -26,9 +22,9 @@ class AuthController extends Controller
     public function register(RegisterUserRequest $request)
     {
         $param = new UserEntity(
-            $request->name,
             $request->email,
-            $request->password
+            $request->password,
+            $request->name,
         );
 
         $this->authService->register($param);
@@ -36,51 +32,27 @@ class AuthController extends Controller
         return $this->buildSuccessResponse();
     }
 
-    public function verify(VerifyUserRequest $request)
+    public function verify(TokenRequest $request)
     {
-        try {
-            $this->authService->verify($request->token);
+        $this->authService->verify($request->token);
 
-            return $this->buildSuccessResponse();
-        } catch (\Exception $exception) {
-            return $this->buildFailResponse(['message' => $exception->getMessage(), 'key' => config('error.token_invalid')]);
-        }
+        return $this->buildSuccessResponse();
     }
 
     public function login(LoginRequest $request)
     {
-        try {
-            $param = new LoginEntity($request->email, $request->password);
-            $data = $this->authService->login($param);
-            $resource = new LoginResource($data);
+        $param = new LoginEntity($request->email, $request->password);
+        $data = $this->authService->login($param);
+        $resource = new LoginResource($data);
 
-            return $this->buildSuccessResponse($resource->resource);
-        } catch (\Exception $exception) {
-            return $this->buildFailResponse(['message' => $exception->getMessage(), 'key' => config('error.login_fail')]);
-        }
+        return $this->buildSuccessResponse($resource->resource);
     }
 
-    public function renewToken($refreshToken)
+    public function renewToken(TokenRequest $request)
     {
-        try {
-            $data = $this->authService->renewToken($refreshToken);
-            $resource = new LoginResource($data);
+        $accessToken = $this->authService->renewToken($request->token);
+        $resource = new LoginResource(['accessToken' => $accessToken]);
 
-            return $this->buildSuccessResponse($resource->resource);
-        } catch (\Exception $exception) {
-            return $this->buildFailResponse(['message' => $exception->getMessage(), 'key' => config('error.login_fail')]);
-        }
-    }
-
-    public function test()
-    {
-        $user = new NotificationResource([
-            'content' => 1,
-            'description' => 2,
-            'is_read' => 2,
-            'type' => 12
-        ]);
-
-        broadcast(new BroadcastingNotificationEvent($user));
+        return $this->buildSuccessResponse($resource->resource);
     }
 }

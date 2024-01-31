@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Exceptions\ApiErrorException;
 use Illuminate\Container\Container as Application;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -220,7 +221,10 @@ abstract class BaseRepository
         $data = $this->find($id);
 
         if (!$data) {
-            throw new \Exception('Model not found');
+            $className = strtolower(class_basename($this->model()));
+            $errorKey = config('error.'.$className.'_not_found') ?? config('error.model_not_found');
+
+            throw new ApiErrorException($errorKey);
         }
 
         return $this->method('delete');

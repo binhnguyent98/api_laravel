@@ -2,7 +2,7 @@
 
 namespace App\Repositories\User;
 
-use App\Exceptions\BaseException;
+use App\Exceptions\ApiErrorException;
 use App\Http\Entities\UserEntity;
 use App\Models\User;
 use App\Repositories\BaseRepository;
@@ -21,7 +21,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
         $existedUser = $this->model->where('email', '=', $entity->getEmail())->first();
 
         if ($existedUser) {
-            throw new BaseException('ád');
+            throw new ApiErrorException(config('error.user_is_existed'));
         }
 
         $data = [
@@ -37,9 +37,9 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     {
         $user = $this->find($id);
 
-        if (!$user) throw new \Exception('User is not found');
+        if (!$user) throw new ApiErrorException(config('error.token_invalid'));
 
-        if ($user->email_verified_at) throw new \Exception('User is verified');
+        if ($user->email_verified_at) throw new ApiErrorException(config('error.user_is_verified'));
 
         $user->email_verified_at = Carbon::now()->toDateTimeString();
         $user->save();

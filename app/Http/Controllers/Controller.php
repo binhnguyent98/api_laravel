@@ -13,7 +13,7 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    public function buildSuccessResponse($data = null, ?int $httpCode = 200, ?string $message = '')
+    public function buildSuccessResponse($data = null, int $httpCode = 200, string $message = '')
     {
         $resource = Helper::buildSuccessResponse($data, $message);
 
@@ -22,8 +22,9 @@ class Controller extends BaseController
 
 
     /**
-     * @param array $error = ['key' => '', 'message' => '']
-     * @param int|null $statusCode
+     * @param string $errorKey
+     * @param  ?string $message
+     * @param ?int $statusCode
      * @return JsonResponse
      */
     public function buildFailResponse(string $errorKey, ?string $message = '', ?int $statusCode = 400)

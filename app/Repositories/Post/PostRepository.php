@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Post;
 
+use App\Exceptions\ApiErrorException;
 use App\Http\Entities\PostEntity;
 use App\Http\Entities\PostQueryEntity;
 use App\Models\Category;
@@ -31,21 +32,19 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
 
     public function createPost(PostEntity $data)
     {
-        try {
-            $category = (new Category())->find($data->getCategoryId());
+        $category = (new Category())->find($data->getCategoryId());
 
-            if(!$category) throw new \Exception('Category not found');
-
-            $param = [
-                'title' => $data->getTitle(),
-                'description' => $data->getDescription(),
-                'category_id' => $category->id
-            ];
-
-            return $this->create($param);
-        } catch (\Exception $exception) {
-            throw new \Exception($exception->getMessage());
+        if(!$category) {
+            throw new ApiErrorException(config('error.category_not_found'));
         }
+
+        $param = [
+            'title' => $data->getTitle(),
+            'description' => $data->getDescription(),
+            'category_id' => $category->id
+        ];
+
+        return $this->create($param);
     }
 
     public function delete($id)
@@ -55,6 +54,6 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
 
     public function find($id)
     {
-        return Post::find($id);
+        return parent::find($id);
     }
 }

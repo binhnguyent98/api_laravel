@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Exceptions\ApiErrorException;
 use App\Utils\Helper;
 use Closure;
 use Illuminate\Http\Request;
@@ -25,15 +26,12 @@ class CustomAuthenticateMiddleware
             $isRefresh = $payload->get('refreshToken') || false;
 
             if ($isRefresh) {
-                throw new \Exception('Token invalid');
+                throw new \Exception();
             }
 
             return $next($request);
         } catch (\Exception $exception) {
-            $response = Helper::buildFailResponse(config('error.token_invalid'), $exception->getMessage());
-
-            return response()->json([], 200);
-            //TODO
+            throw new ApiErrorException(config('error.forbidden'), '', config('http_status_code.forbidden'));
         }
     }
 }

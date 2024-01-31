@@ -3,12 +3,12 @@
 namespace App\Exceptions;
 
 use App\Utils\Helper;
-use Faker\Provider\Base;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Validation\ValidationException as ValidationException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 
 class Handler extends ExceptionHandler
 {
@@ -55,10 +55,9 @@ class Handler extends ExceptionHandler
 
     public function render($request, Throwable $e)
     {
-        dd($e);
         $statusCode = config('http_status_code.internal_server_error');
         $errorKey = config('error.internal_server_error');
-        $message = '';
+        $message = $e->getMessage();
 
         switch (true) {
             case $e instanceof NotFoundHttpException:
@@ -77,8 +76,15 @@ class Handler extends ExceptionHandler
                 $message = $e->getMessage();
                 break;
 
-            case $e instanceof Base:
-                $statusCode = 1;
+            case $e instanceof ApiErrorException:
+                $statusCode = $e->getStatusCode();
+                $errorKey = $e->getErrorCode();
+                break;
+
+            case $e instanceof TokenInvalidException:
+                $statusCode = config('http_status_code.bad_request');
+                $errorKey = config('error.token_invalid');
+                break;
             default:
                 break;
         }

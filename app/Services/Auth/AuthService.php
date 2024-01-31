@@ -3,23 +3,18 @@
 namespace App\Services\Auth;
 
 use App\Events\NotificationUserEvent;
+use App\Exceptions\ApiErrorException;
 use App\Http\Entities\LoginEntity;
 use App\Http\Entities\NotificationEntity;
 use App\Http\Entities\PersonalAccessTokenEntity;
 use App\Http\Entities\UserEntity;
 use App\Mail\RegisterSuccessUserMail;
-use App\Mail\SendMailNotification;
-use App\Models\User;
 use App\Repositories\PersonalAccessToken\PersonalAccessTokenRepositoryInterface;
 use App\Repositories\User\UserRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Testing\Fluent\Concerns\Has;
-use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
-use Tymon\JWTAuth\JWT;
 
 class AuthService
 {
@@ -58,19 +53,15 @@ class AuthService
             DB::commit();
         } catch (\Exception $exception) {
             DB::rollBack();
-            throw new \Exception($exception->getMessage());
+            throw $exception;
         }
     }
 
     public function verify($token)
     {
-        try {
-            $token = JWTAuth::setToken($token)->getPayload();
+        $token = JWTAuth::setToken($token)->getPayload();
 
-            return $this->userRepository->verifyUser($token->get('sub'));
-        } catch (\Exception $exception) {
-            throw new \Exception($exception->getMessage());
-        }
+        return $this->userRepository->verifyUser($token->get('sub'));
     }
 
     public function login(LoginEntity $entity)
@@ -85,7 +76,10 @@ class AuthService
             $accessToken = auth('api')->attempt($attemptInfo);
             $user = auth()->user();
 
-            if (!$accessToken) throw new \Exception('Toke invalid');
+            if (!$accessToken) {
+                throw new ApiErrorException(config('error.login_incorrect'));
+            }
+
             $payload = [
                 'refreshToken' => true,
                 'exp' => Carbon::now()->addMinutes(config('jwt.refresh_ttl'))
@@ -95,7 +89,7 @@ class AuthService
             $user = $user->refresh();
 
             if (!$user->hasVerifiedEmail()) {
-                throw new \Exception();
+                throw new ApiErrorException(config('error.user_must_verify'));
             }
 
             $personalToken = $this->personalRepository->create(new PersonalAccessTokenEntity(
@@ -113,7 +107,7 @@ class AuthService
             ];
         } catch (\Exception $exception) {
             DB::rollBack();
-            throw new \Exception('Email or password is incorrect');
+            throw $exception;
         }
     }
 
@@ -122,14 +116,6 @@ class AuthService
         $token = JWTAuth::setToken($refreshToken)->getPayload();
         $user = $this->userRepository->renewToken($token->get('sub'), $refreshToken);
 
-        if (!$user) throw new \Exception('Token has expired, please log in again');
-
-        $payload = [
-            'refreshToken' => false,
-        ];
-
-        return [
-            'accessToken' => JWTAuth::customClaims($payload)->fromUser($user)
-        ];
+        return JWTAuth::customClaims(['refreshToken' => false])->fromUser($user);
     }
 }
