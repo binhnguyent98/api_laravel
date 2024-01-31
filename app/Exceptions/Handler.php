@@ -55,25 +55,25 @@ class Handler extends ExceptionHandler
     public function render($request, Throwable $e)
     {
         if ($e instanceof  MethodNotAllowedHttpException) {
-            $failResource = Helper::buildResponse(false, 'Method is not supported', '', $e->getMessage());
+            $failResource = Helper::buildResponse(false,  null, ['key' => config('error.method_not_allow')]);
 
-            return response()->json($failResource, config('http_status_code.method_not_allowed'));
+            return response()->json($failResource, config('http_status_code.method_not_allowed.method_not_allow'));
         }
 
         if ($e instanceof ValidationException) {
-            $failResource = Helper::buildResponse(false, 'Bad request', '', $e->getMessage());
+            $failResource = Helper::buildResponse(false, null, ['key' => config('error.validator')]);
 
             return response()->json($failResource, config('http_status_code.bad_request'));
         }
 
         if ($e instanceof NotFoundHttpException) {
-            $failResource = Helper::buildResponse(false, 'Api not found');
+            $failResource = Helper::buildResponse(false, null, ['key' => config('error.not_found')]);
 
             return response()->json($failResource, config('http_status_code.not_found'));
         }
 
         if ($this->isHttpException($e) && $e->getStatusCode() == 500) {
-            $failResource = Helper::buildResponse(false, 'Internal Server Error');
+            $failResource = Helper::buildResponse(false, null, ['key' => config('error.internal_server_error')]);
 
             return response()->json($failResource, config('http_status_code.internal_server_error'));
         }

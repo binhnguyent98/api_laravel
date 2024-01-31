@@ -25,15 +25,14 @@ class Helper
         return join('&', $result);
     }
 
-    public static function buildResponse(bool $status, string $message, $data = null, $error = null)
+    public static function buildResponse(bool $status, $data = null, $error = [])
     {
         $result = [
             'status' => $status,
         ];
 
         if ($data) $result['data'] = $data;
-        if ($message) $result['message'] = $message;
-        if ($error) $result['error'] = $error;
+        if (count($error) > 0) $result['error'] = $error;
 
         $resource = new BaseResponseResource($result);
 

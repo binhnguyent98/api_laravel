@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Route;
 //});
 
 Route::group(['prefix' => '/posts', 'middleware' => 'auth:api'], function () {
+    Route::get('/{id}', [PostController::class, 'detail']);
     Route::get('/', [PostController::class, 'fetch']);
     Route::post('/create', [PostController::class, 'create']);
     Route::delete('/delete/{id}', [PostController::class, 'delete']);

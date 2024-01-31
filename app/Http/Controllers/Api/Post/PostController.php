@@ -44,9 +44,9 @@ class PostController extends Controller
                 $request->category_id
             ));
 
-            return $this->buildSuccessResponse('', 'Create posts successfully');
+            return $this->buildSuccessResponse(null, config('http_status_code.created'));
         } catch (\Exception $exception) {
-            return $this->buildFailResponse($exception->getMessage());
+            return $this->buildFailResponse(['message' => $exception->getMessage(), 'key' => config('error.item_not_found')]);
         }
     }
 
@@ -55,9 +55,20 @@ class PostController extends Controller
         try {
             $this->postService->delete((int)$id);
 
-            return $this->buildSuccessResponse('', 'Post is deleted');
+            return $this->buildSuccessResponse();
         } catch (\Exception $exception) {
-            return $this->buildFailResponse($exception->getMessage());
+            return $this->buildFailResponse(['message' => $exception->getMessage(), 'key' => config('error.item_not_found')]);
+
+        }
+    }
+
+    public function detail($id)
+    {
+        try {
+            $post = $this->postService->detail((int)$id);
+            return $this->buildSuccessResponse($post);
+        } catch (\Exception $exception) {
+            return $this->buildFailResponse(['message' => $exception->getMessage(), 'key' => config('error.item_not_found')]);
 
         }
     }

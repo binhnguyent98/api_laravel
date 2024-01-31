@@ -33,9 +33,9 @@ class AuthController extends Controller
 
             $this->authService->register($param);
 
-            return $this->buildSuccessResponse('', 'Register user successfully, please check mail is verify account');
+            return $this->buildSuccessResponse();
         } catch (\Exception $exception) {
-            return $this->buildFailResponse($exception->getMessage());
+            return $this->buildFailResponse(['message' => $exception->getMessage(), 'key' => config('error.register_fail')]);
         }
     }
 
@@ -44,9 +44,9 @@ class AuthController extends Controller
         try {
             $this->authService->verify($request->token);
 
-            return $this->buildSuccessResponse('', 'Verify account successfully');
+            return $this->buildSuccessResponse();
         } catch (\Exception $exception) {
-            return $this->buildFailResponse($exception->getMessage());
+            return $this->buildFailResponse(['message' => $exception->getMessage(), 'key' => config('error.token_invalid')]);
         }
     }
 
@@ -59,7 +59,7 @@ class AuthController extends Controller
 
             return $this->buildSuccessResponse($resource->resource);
         } catch (\Exception $exception) {
-            return $this->buildFailResponse($exception->getMessage());
+            return $this->buildFailResponse(['message' => $exception->getMessage(), 'key' => config('error.login_fail')]);
         }
     }
 
@@ -71,7 +71,7 @@ class AuthController extends Controller
 
             return $this->buildSuccessResponse($resource->resource);
         } catch (\Exception $exception) {
-            return $this->buildFailResponse($exception->getMessage(), config('http_status_code.unauthorized'));
+            return $this->buildFailResponse(['message' => $exception->getMessage(), 'key' => config('error.login_fail')]);
         }
     }
 

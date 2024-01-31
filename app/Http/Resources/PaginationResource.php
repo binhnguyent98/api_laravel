@@ -16,7 +16,7 @@ class PaginationResource extends ResourceCollection
                 'page' => $this->currentPage(),
                 'perPage' => $this->perPage()
             ],
-            'data' => $this->data,
+            'items' => $this->data,
         ];
     }
 }

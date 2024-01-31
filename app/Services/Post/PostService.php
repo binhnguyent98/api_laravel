@@ -46,4 +46,9 @@ class PostService extends BaseService
     {
         return $this->postRepository->delete($id);
     }
+
+    public function detail($id)
+    {
+        return $this->postRepository->find($id);
+    }
 }

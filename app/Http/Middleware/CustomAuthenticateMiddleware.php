@@ -30,7 +30,7 @@ class CustomAuthenticateMiddleware
 
             return $next($request);
         } catch (\Exception $exception) {
-            $response = Helper::buildResponse(false, '', '', 'Unauthorized');
+            $response = Helper::buildResponse(false, null, ['key' => config('error.forbidden')]);
 
             return response()->json($response, config('http_status_code.unauthorized'));
         }

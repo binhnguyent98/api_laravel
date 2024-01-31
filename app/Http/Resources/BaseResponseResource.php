@@ -16,9 +16,8 @@ class BaseResponseResource extends JsonResource
     {
         return [
             'status' => $this->status,
-            'message' => $this->message,
             'data' => $this->data,
-            'errors' => $this->error,
+            'error' => $this->error,
         ];
     }
 }

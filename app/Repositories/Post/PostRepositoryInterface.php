@@ -12,4 +12,6 @@ interface PostRepositoryInterface
     public function createPost(PostEntity $data);
 
     public function delete($id);
+
+    public function find($id);
 }

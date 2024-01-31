@@ -52,4 +52,9 @@ class PostRepository extends BaseRepository implements PostRepositoryInterface
     {
         return $this->destroy($id);
     }
+
+    public function find($id)
+    {
+        return Post::find($id);
+    }
 }
